@@ -21,17 +21,17 @@ class Ammonia(object):
     # app screens
     SCREENS = {
         'welcome': {
-            LCD.UP: { 'method': 'transition_to', 'args': ('measure', ) },
-            LCD.DOWN: { 'method': 'transition_to', 'args': ('calibrate', ) }
+            LCD.UP: {'method': 'transition_to', 'args': ('measure', )},
+            LCD.DOWN: {'method': 'transition_to', 'args': ('calibrate', )}
         },
         'measure': {
-            LCD.LEFT: { 'method': 'transition_to', 'args': ('welcome', ) }
+            LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )}
         },
         'calibrate': {
-            LCD.LEFT: { 'method': 'transition_to', 'args': ('welcome', ) },
-            LCD.UP: { 'method': 'select_next_probe', 'args': () },
-            LCD.DOWN: { 'method': 'select_prev_probe', 'args': () },
-            LCD.SELECT: { 'method': 'calibrate_selected_probe', 'args': () }
+            LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )},
+            LCD.UP: {'method': 'select_next_probe', 'args': ()},
+            LCD.DOWN: {'method': 'select_prev_probe', 'args': ()},
+            LCD.SELECT: {'method': 'calibrate_selected_probe', 'args': ()}
         }
     }
 

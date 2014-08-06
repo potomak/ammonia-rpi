@@ -21,14 +21,14 @@ class Ammonia(object):
     # app screens
     SCREENS = {
         'welcome': {
-            LCD.UP: { 'method': 'transition_to', 'args': ('measure') },
-            LCD.DOWN: { 'method': 'transition_to', 'args': ('calibrate') }
+            LCD.UP: { 'method': 'transition_to', 'args': ('measure', ) },
+            LCD.DOWN: { 'method': 'transition_to', 'args': ('calibrate', ) }
         },
         'measure': {
-            LCD.LEFT: { 'method': 'transition_to', 'args': ('welcome') }
+            LCD.LEFT: { 'method': 'transition_to', 'args': ('welcome', ) }
         },
         'calibrate': {
-            LCD.LEFT: { 'method': 'transition_to', 'args': ('welcome') },
+            LCD.LEFT: { 'method': 'transition_to', 'args': ('welcome', ) },
             LCD.UP: { 'method': 'select_next_probe', 'args': () },
             LCD.DOWN: { 'method': 'select_prev_probe', 'args': () },
             LCD.SELECT: { 'method': 'calibrate_selected_probe', 'args': () }
@@ -37,24 +37,24 @@ class Ammonia(object):
 
 
     def __init__(self):
-        self.__setup_serial()
-        self.__setup_LCD()
-        self.__setup_GPIO()
+        self._setup_serial()
+        self._setup_LCD()
+        self._setup_GPIO()
         self.current_screen = 'welcome'
         self.current_screen_daemon = None
         self.daemon_should_run = False
 
 
-    def __setup_serial(self):
+    def _setup_serial(self):
         self.serial = serial.Serial('/dev/ttyAMA0', 38400)
 
 
-    def __setup_LCD(self):
+    def _setup_LCD(self):
         self.lcd = LCD.Adafruit_CharLCDPlate()
         self.lcd.clear()
 
 
-    def __setup_GPIO(self):
+    def _setup_GPIO(self):
         GPIO.setmode(GPIO.BOARD)
 
         # channel selector pins
@@ -62,7 +62,7 @@ class Ammonia(object):
         GPIO.setup(B_PIN, GPIO.OUT)
 
 
-    def __read_message(self):
+    def _read_message(self):
         message = ''
 
         data = self.serial.read()
@@ -73,7 +73,7 @@ class Ammonia(object):
         return message
 
 
-    def __select_channel(self, number):
+    def _select_channel(self, number):
         b_value = number % 2
         number = number / 2
         a_value = number % 2
@@ -82,103 +82,103 @@ class Ammonia(object):
         GPIO.output(B_PIN, GPIO.LOW if b_value == 0 else GPIO.HIGH)
 
 
-    def __call_method(self, name, args=()):
-        getattr(self, '__%s' % name)(*args)
+    def _call_method(self, name, args=()):
+        getattr(self, '_%s' % name)(*args)
 
 
-    def __handle_input(self):
+    def _handle_input(self):
         screen = SCREENS[self.current_screen]
 
         for button in screen.keys():
             if self.lcd.is_pressed(button):
                 state = screen[button]
-                self.__call_method(state['method'])(state['args'])
+                self._call_method(state['method'], state['args'])
 
 
-    def __transition_to(self, target):
+    def _transition_to(self, target):
         if self.current_screen_daemon:
             self.daemon_should_run = False
             self.current_screen_daemon.join(10)
 
         self.current_screen = target
-        self.__call_method('%s_screen_init' % target)
-        target_method = getattr(self, '__%s_screen_update' % target)
+        self._call_method('_%s_screen_init' % target)
+        target_method = getattr(self, '_%s_screen_update' % target)
         self.daemon_should_run = True
         self.current_screen_daemon = threading.Thread(target=target_method)
         self.current_screen_daemon.daemon = True
         self.current_screen_daemon.start()
 
 
-    def __select_next_probe(self):
+    def _select_next_probe(self):
         # TODO
         pass
 
 
-    def __select_prev_probe(self):
+    def _select_prev_probe(self):
         # TODO
         pass
 
 
-    def __calibrate_selected_probe(self):
+    def _calibrate_selected_probe(self):
         # TODO
         pass
 
 
-    def __welcome_screen_init(self):
+    def _welcome_screen_init(self):
         self.lcd.clear()
         self.lcd.message("Measure\n")
         self.lcd.message("Calibrate\n")
 
 
-    def __welcome_screen_update(self):
+    def _welcome_screen_update(self):
         pass
 
 
-    def __measure_screen_init(self):
+    def _measure_screen_init(self):
         self.lcd.clear()
         self.lcd.message("Measuring...")
 
 
-    def __measure_screen_update(self):
+    def _measure_screen_update(self):
         while self.daemon_should_run:
-            self.__select_channel(TEMP)
+            self._select_channel(TEMP)
             self.serial.write("R\r")
-            temp = self.__read_message()
+            temp = self._read_message()
 
-            self.__select_channel(EC)
+            self._select_channel(EC)
             self.serial.write("%sC\r" % temp)
-            ec, _, _ = self.__read_message().split(',')
+            ec, _, _ = self._read_message().split(',')
 
-            self.__select_channel(ORP)
+            self._select_channel(ORP)
             self.serial.write("R\r")
             orp = self.__read_message()
 
-            ammonia = self.__predict_ammonia(float(temp), int(ec), float(orp))
+            ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
 
             self.lcd.clear()
             self.lcd.message("NH3: %s\n" % ammonia)
             self.lcd.message("Temp: %s - EC: %s" % (temp, ec))
 
 
-    def __calibrate_screen_init(self):
+    def _calibrate_screen_init(self):
         # TODO: implement probe selection for calibration
         pass
 
 
-    def __calibrate_screen_update(self):
+    def _calibrate_screen_update(self):
         pass
 
 
-    def __predict_ammonia(self, temp, ec, orp):
+    def _predict_ammonia(self, temp, ec, orp):
         # TODO: implement ammonia prediction algorithm
         pass
 
 
     def start(self):
-        self.__transition_to('welcome')
+        self._transition_to('welcome')
 
         while True:
-            self.__handle_input()
+            self._handle_input()
 
 
 def signal_handler(signal, frame):

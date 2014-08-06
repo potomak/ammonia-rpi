@@ -151,7 +151,7 @@ class Ammonia(object):
 
             self._select_channel(ORP)
             self.serial.write("R\r")
-            orp = self.__read_message()
+            orp = self._read_message()
 
             ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
 

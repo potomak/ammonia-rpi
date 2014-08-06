@@ -6,7 +6,7 @@ import RPi.GPIO as GPIO
 import Adafruit_CharLCD as LCD
 
 
-class Ammonia():
+class Ammonia(object):
     """Class to interact with EC, ORP, and TEMP probes and an HD44780 character LCD display."""
 
     # channel selection pins

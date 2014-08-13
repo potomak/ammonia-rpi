@@ -101,7 +101,7 @@ class Ammonia(object):
             self.current_screen_daemon.join(10)
 
         self.current_screen = target
-        self._call_method('_%s_screen_init' % target)
+        self._call_method('%s_screen_init' % target)
         target_method = getattr(self, '_%s_screen_update' % target)
         self.daemon_should_run = True
         self.current_screen_daemon = threading.Thread(target=target_method)

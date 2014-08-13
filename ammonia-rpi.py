@@ -58,8 +58,8 @@ class Ammonia(object):
         GPIO.setmode(GPIO.BOARD)
 
         # channel selector pins
-        GPIO.setup(A_PIN, GPIO.OUT)
-        GPIO.setup(B_PIN, GPIO.OUT)
+        GPIO.setup(self.A_PIN, GPIO.OUT)
+        GPIO.setup(self.B_PIN, GPIO.OUT)
 
 
     def _read_message(self):
@@ -78,8 +78,8 @@ class Ammonia(object):
         number = number / 2
         a_value = number % 2
 
-        GPIO.output(A_PIN, GPIO.LOW if a_value == 0 else GPIO.HIGH)
-        GPIO.output(B_PIN, GPIO.LOW if b_value == 0 else GPIO.HIGH)
+        GPIO.output(self.A_PIN, GPIO.LOW if a_value == 0 else GPIO.HIGH)
+        GPIO.output(self.B_PIN, GPIO.LOW if b_value == 0 else GPIO.HIGH)
 
 
     def _call_method(self, name, args=()):
@@ -87,7 +87,7 @@ class Ammonia(object):
 
 
     def _handle_input(self):
-        screen = SCREENS[self.current_screen]
+        screen = self.SCREENS[self.current_screen]
 
         for button in screen.keys():
             if self.lcd.is_pressed(button):
@@ -141,15 +141,15 @@ class Ammonia(object):
 
     def _measure_screen_update(self):
         while self.daemon_should_run:
-            self._select_channel(TEMP)
+            self._select_channel(self.TEMP_CHANNEL)
             self.serial.write("R\r")
             temp = self._read_message()
 
-            self._select_channel(EC)
+            self._select_channel(self.EC_CHANNEL)
             self.serial.write("%sC\r" % temp)
             ec, _, _ = self._read_message().split(',')
 
-            self._select_channel(ORP)
+            self._select_channel(self.ORP_CHANNEL)
             self.serial.write("R\r")
             orp = self._read_message()
 

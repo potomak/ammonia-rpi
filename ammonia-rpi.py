@@ -156,8 +156,8 @@ class Ammonia(object):
             ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
 
             self.lcd.clear()
-            self.lcd.message("NH3: %s\n" % ammonia)
-            self.lcd.message("Temp: %s - EC: %s" % (temp, ec))
+            self.lcd.message("NH4+ (mg/l): %s\n" % ammonia)
+            self.lcd.message("Temp (C): %s - EC (mS/cm): %s" % (temp, ec))
 
 
     def _calibrate_screen_init(self):

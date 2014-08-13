@@ -35,6 +35,30 @@ class Ammonia(object):
         }
     }
 
+    # custom characters
+    RIGHT_ARROW_CHAR = 0
+    RIGHT_ARROW_CHAR_BITMAP = (
+        0b00000000,
+        0b00001000,
+        0b00001100,
+        0b00001110,
+        0b00001100,
+        0b00001000,
+        0b00000000,
+        0b00000000
+    )
+    DOUBLE_ARROW_CHAR = 1
+    DOUBLE_ARROW_CHAR_BITMAP = [
+        0b00000100,
+        0b00001110,
+        0b00011111,
+        0b00000000,
+        0b00011111,
+        0b00001110,
+        0b00000100,
+        0b00000000
+    ]
+
 
     def __init__(self):
         self._setup_serial()
@@ -51,6 +75,8 @@ class Ammonia(object):
 
     def _setup_LCD(self):
         self.lcd = LCD.Adafruit_CharLCDPlate()
+        self._create_custom_char(self.RIGHT_ARROW_CHAR, self.RIGHT_ARROW_CHAR_BITMAP)
+        self._create_custom_char(self.DOUBLE_ARROW_CHAR, self.DOUBLE_ARROW_CHAR_BITMAP)
         self.lcd.clear()
 
 
@@ -60,6 +86,13 @@ class Ammonia(object):
         # channel selector pins
         GPIO.setup(self.A_PIN, GPIO.OUT)
         GPIO.setup(self.B_PIN, GPIO.OUT)
+
+
+    def _create_custom_char(self, location, bitmap):
+        self.lcd.write8(LCD.LCD_SETCGRAMADDR | ((location & 7) << 3), False)
+        for line in bitmap:
+            self.lcd.write8(line, True)
+        self.lcd.write8(LCD.LCD_SETDDRAMADDR, False)
 
 
     def _read_message(self):

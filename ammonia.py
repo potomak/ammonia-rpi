@@ -2,6 +2,7 @@ import sys
 import signal
 import serial
 import threading
+import screens
 import RPi.GPIO as GPIO
 import Adafruit_CharLCD as LCD
 
@@ -20,7 +21,7 @@ class Ammonia(object):
 
     # app screens
     SCREENS = {
-        'welcome': {},
+        'screens.Welcome': {},
         'measure': {
             LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )}
         },
@@ -116,7 +117,7 @@ class Ammonia(object):
         getattr(self, '_%s' % name)(*args)
 
 
-    def _get_class(klass):
+    def _get_class(self, klass):
         parts = klass.split('.')
         module = '.'.join(parts[:-1])
         m = __import__(module)
@@ -140,9 +141,9 @@ class Ammonia(object):
             self.current_screen_daemon.join(10)
 
         self.current_screen = target
-        self.current_screen_instance = _get_class(klass)(self.lcd)
+        self.current_screen_instance = self._get_class(target)(self.lcd)
         self.current_screen_instance.screen_init()
-        target_method = getattr(current_screen_instance, 'screen_update')
+        target_method = getattr(self.current_screen_instance, 'screen_update')
         self.daemon_should_run = True
         self.current_screen_daemon = threading.Thread(target=target_method)
         self.current_screen_daemon.daemon = True
@@ -210,7 +211,7 @@ class Ammonia(object):
 
 
     def start(self):
-        self._transition_to('welcome')
+        self._transition_to('screens.Welcome')
 
         while True:
             self._handle_input()

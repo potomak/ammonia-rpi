@@ -36,10 +36,12 @@ class Selection(Screen):
 
     def select_next_item(self):
         self.current_screen_item = (self.current_screen_item + 1) % len(self.items)
+        self.screen_init()
 
 
     def select_prev_item(self):
         self.current_screen_item = (self.current_screen_item - 1) % len(self.items)
+        self.screen_init()
 
 
     def screen_init(self):
@@ -50,8 +52,7 @@ class Selection(Screen):
 
 
     def screen_update(self):
-        while self.daemon_should_run:
-            self.screen_init()
+        pass
 
 
 class Welcome(Selection):

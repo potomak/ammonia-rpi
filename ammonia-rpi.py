@@ -131,6 +131,8 @@ class Ammonia(object):
     def _transition_to(self, target):
         if self.current_screen_daemon:
             self.daemon_should_run = False
+            self.lcd.clear()
+            self.lcd.message("Please wait...")
             self.current_screen_daemon.join(10)
 
         self.current_screen = target

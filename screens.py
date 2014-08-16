@@ -45,7 +45,7 @@ class Selection(Screen):
     def select_next_item(self):
         if self.current_item + 1 < len(self.items):
             self.current_item = self.current_item + 1
-            if !(self.current_item < self.window_index + self.LCD_LINES):
+            if not (self.current_item < self.window_index + self.LCD_LINES):
                 self.window_index = self.window_index + 1
         self._print_selection()
 
@@ -70,8 +70,8 @@ class Welcome(Selection):
     """Ammonia welcome screen."""
 
     INTERACTIONS = {
-        LCD.UP: {'method': 'select_next_item', 'args': ()},
-        LCD.DOWN: {'method': 'select_prev_item', 'args': ()},
+        LCD.UP: {'method': 'select_prev_item', 'args': ()},
+        LCD.DOWN: {'method': 'select_next_item', 'args': ()},
         LCD.SELECT: {'method': 'transition_to_item', 'args': ()}
     }
 

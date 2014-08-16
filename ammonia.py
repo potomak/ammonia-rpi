@@ -4,6 +4,7 @@ import serial
 import threading
 import screens
 import time
+import string
 import RPi.GPIO as GPIO
 import Adafruit_CharLCD as LCD
 
@@ -29,12 +30,7 @@ class Ammonia(object):
         'measure': {
             LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )}
         },
-        'calibrate': {
-            LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )},
-            LCD.UP: {'method': 'select_next_probe', 'args': ()},
-            LCD.DOWN: {'method': 'select_prev_probe', 'args': ()},
-            LCD.SELECT: {'method': 'calibrate_selected_probe', 'args': ()}
-        }
+        'screens.Calibrate': {}
     }
 
     # custom characters
@@ -66,7 +62,6 @@ class Ammonia(object):
         self._setup_serial()
         self._setup_LCD()
         self._setup_GPIO()
-        self.current_screen = 'welcome'
         self.current_screen_daemon = None
         self.daemon_should_run = False
 
@@ -156,7 +151,7 @@ class Ammonia(object):
 
     def _transition_to_item(self):
         target = self.current_screen_instance.current_item_name()
-        self._transition_to(target)
+        self._transition_to('screens.%s' % string.capwords(target, '_').replace('_', ''))
 
 
     def _select_next_item(self):
@@ -165,16 +160,6 @@ class Ammonia(object):
 
     def _select_prev_item(self):
         self.current_screen_instance.select_prev_item()
-
-
-    def _select_next_probe(self):
-        # TODO
-        pass
-
-
-    def _select_prev_probe(self):
-        # TODO
-        pass
 
 
     def _calibrate_selected_probe(self):
@@ -206,15 +191,6 @@ class Ammonia(object):
             self.lcd.clear()
             self.lcd.message("NH4+ (mg/l): %s\n" % ammonia)
             self.lcd.message("Temp (C): %s - EC (mS/cm): %s" % (temp, ec))
-
-
-    def _calibrate_screen_init(self):
-        # TODO: implement probe selection for calibration
-        pass
-
-
-    def _calibrate_screen_update(self):
-        pass
 
 
     def _predict_ammonia(self, temp, ec, orp):

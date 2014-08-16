@@ -11,6 +11,9 @@ import Adafruit_CharLCD as LCD
 class Ammonia(object):
     """Class to interact with EC, ORP, and TEMP probes and an HD44780 character LCD display."""
 
+    # debounce time
+    DEBOUNCE = 0.1
+
     # channel selection pins
     A_PIN = 7
     B_PIN = 12
@@ -225,7 +228,7 @@ class Ammonia(object):
 
         while True:
             time_now = time.time()
-            if (time_now - time_stamp) >= 0.1:
+            if (time_now - time_stamp) >= self.DEBOUNCE:
                 self._handle_input()
                 time_stamp = time_now
 

@@ -34,6 +34,14 @@ class Selection(Screen):
         return self.items[self.current_screen_item]
 
 
+    def select_next_item(self):
+        self.current_screen_item = (self.current_screen_item + 1) % len(self.items)
+
+
+    def select_prev_item(self):
+        self.current_screen_item = (self.current_screen_item - 1) % len(self.items)
+
+
     def screen_init(self):
         self.lcd.clear()
         for item in self.items[self.current_screen_item:self.current_screen_item + self.LCD_LINES]:
@@ -42,7 +50,8 @@ class Selection(Screen):
 
 
     def screen_update(self):
-        pass
+        while self.daemon_should_run:
+            self.screen_init()
 
 
 class Welcome(Selection):
@@ -59,5 +68,3 @@ class Welcome(Selection):
 
     def __init__(self, lcd):
         super(Welcome, self).__init__(lcd, self.INTERACTIONS, self.ITEMS)
-
-

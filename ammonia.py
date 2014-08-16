@@ -155,6 +155,14 @@ class Ammonia(object):
         self._transition_to(target)
 
 
+    def _select_next_item(self):
+        self.current_screen_instance.select_next_item()
+
+
+    def _select_prev_item(self):
+        self.current_screen_instance.select_prev_item()
+
+
     def _select_next_probe(self):
         # TODO
         pass

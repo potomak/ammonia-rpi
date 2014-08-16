@@ -26,29 +26,40 @@ class Selection(Screen):
 
     def __init__(self, lcd, interactions, items):
         super(Selection, self).__init__(lcd, interactions)
-        self.current_screen_item = 0
+        self.current_item = 0
+        self.window_index = 0
         self.items = items
 
 
     def current_screen_name(self):
-        return self.items[self.current_screen_item]
+        return self.items[self.current_item]
+
+
+    def _print_selection(self):
+        self.lcd.clear()
+        for item in self.items[self.window_index:self.window_index + self.LCD_LINES]:
+            cursor = chr(Ammonia.RIGHT_ARROW_CHAR) if item == self.current_screen_name() else ' '
+            self.lcd.message("%s%s\n" % (cursor, string.capwords(item, '_').replace('_', '')))
 
 
     def select_next_item(self):
-        self.current_screen_item = (self.current_screen_item + 1) % len(self.items)
-        self.screen_init()
+        if self.current_item + 1 < len(self.items):
+            self.current_item = self.current_item + 1
+            if !(self.current_item < self.window_index + self.LCD_LINES):
+                self.window_index = self.window_index + 1
+        self._print_selection()
 
 
     def select_prev_item(self):
-        self.current_screen_item = (self.current_screen_item - 1) % len(self.items)
-        self.screen_init()
+        if self.current_item - 1 >= 0:
+            self.current_item = self.current_item - 1
+            if self.current_item < self.window_index:
+                self.window_index = self.window_index - 1
+        self._print_selection()
 
 
     def screen_init(self):
-        self.lcd.clear()
-        for item in self.items[self.current_screen_item:self.current_screen_item + self.LCD_LINES]:
-            cursor = chr(Ammonia.RIGHT_ARROW_CHAR) if item == self.current_screen_name() else ' '
-            self.lcd.message("%s%s\n" % (cursor, string.capwords(item, '_').replace('_', '')))
+        self._print_selection()
 
 
     def screen_update(self):

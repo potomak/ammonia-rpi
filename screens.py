@@ -31,14 +31,14 @@ class Selection(Screen):
         self.items = items
 
 
-    def current_screen_name(self):
+    def current_item_name(self):
         return self.items[self.current_item]
 
 
     def _print_selection(self):
         self.lcd.clear()
         for item in self.items[self.window_index:self.window_index + self.LCD_LINES]:
-            cursor = chr(Ammonia.RIGHT_ARROW_CHAR) if item == self.current_screen_name() else ' '
+            cursor = chr(Ammonia.RIGHT_ARROW_CHAR) if item == self.current_item_name() else ' '
             self.lcd.message("%s%s\n" % (cursor, string.capwords(item, '_').replace('_', '')))
 
 
@@ -96,4 +96,4 @@ class Calibrate(Selection):
 
 
     def __init__(self, lcd):
-        super(Welcome, self).__init__(lcd, self.INTERACTIONS, self.ITEMS)
+        super(Calibrate, self).__init__(lcd, self.INTERACTIONS, self.ITEMS)

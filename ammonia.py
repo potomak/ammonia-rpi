@@ -3,6 +3,7 @@ import signal
 import serial
 import threading
 import screens
+import time
 import RPi.GPIO as GPIO
 import Adafruit_CharLCD as LCD
 
@@ -220,9 +221,13 @@ class Ammonia(object):
 
     def start(self):
         self._transition_to('screens.Welcome')
+        time_stamp = time.time()
 
         while True:
-            self._handle_input()
+            time_now = time.time()
+            if (time_now - time_stamp) >= 0.1:
+                self._handle_input()
+                time_stamp = time_now
 
 
 def signal_handler(signal, frame):

@@ -142,11 +142,13 @@ class Ammonia(object):
         self.current_screen = target
         self.current_screen_instance = self._get_class(target)(self.lcd)
         self.current_screen_instance.screen_init()
-        target_method = getattr(self.current_screen_instance, 'screen_update')
-        self.daemon_should_run = True
-        self.current_screen_daemon = threading.Thread(target=target_method)
-        self.current_screen_daemon.daemon = True
-        self.current_screen_daemon.start()
+
+        target_method = getattr(self.current_screen_instance, 'screen_update', False)
+        if target_method:
+            self.daemon_should_run = True
+            self.current_screen_daemon = threading.Thread(target=target_method)
+            self.current_screen_daemon.daemon = True
+            self.current_screen_daemon.start()
 
 
     def _transition_to_item(self):

@@ -20,10 +20,7 @@ class Ammonia(object):
 
     # app screens
     SCREENS = {
-        'welcome': {
-            LCD.UP: {'method': 'transition_to', 'args': ('measure', )},
-            LCD.DOWN: {'method': 'transition_to', 'args': ('calibrate', )}
-        },
+        'welcome': {},
         'measure': {
             LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )}
         },
@@ -119,13 +116,20 @@ class Ammonia(object):
         getattr(self, '_%s' % name)(*args)
 
 
-    def _handle_input(self):
-        screen = self.SCREENS[self.current_screen]
+    def _get_class(klass):
+        parts = klass.split('.')
+        module = '.'.join(parts[:-1])
+        m = __import__(module)
+        for comp in parts[1:]:
+            m = getattr(m, comp)
+        return m
 
-        for button in screen.keys():
+
+    def _handle_input(self):
+        for button in self.current_screen_instance.buttons():
             if self.lcd.is_pressed(button):
-                state = screen[button]
-                self._call_method(state['method'], state['args'])
+                action = self.current_screen_instance.action(button)
+                self._call_method(action['method'], action['args'])
 
 
     def _transition_to(self, target):
@@ -136,12 +140,18 @@ class Ammonia(object):
             self.current_screen_daemon.join(10)
 
         self.current_screen = target
-        self._call_method('%s_screen_init' % target)
-        target_method = getattr(self, '_%s_screen_update' % target)
+        self.current_screen_instance = _get_class(klass)(self.lcd)
+        self.current_screen_instance.screen_init()
+        target_method = getattr(current_screen_instance, 'screen_update')
         self.daemon_should_run = True
         self.current_screen_daemon = threading.Thread(target=target_method)
         self.current_screen_daemon.daemon = True
         self.current_screen_daemon.start()
+
+
+    def _transition_to_item(self):
+        target = self.current_screen_instance.current_item_name()
+        self._transition_to(target)
 
 
     def _select_next_probe(self):
@@ -156,16 +166,6 @@ class Ammonia(object):
 
     def _calibrate_selected_probe(self):
         # TODO
-        pass
-
-
-    def _welcome_screen_init(self):
-        self.lcd.clear()
-        self.lcd.message("Measure\n")
-        self.lcd.message("Calibrate\n")
-
-
-    def _welcome_screen_update(self):
         pass
 
 

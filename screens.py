@@ -62,10 +62,6 @@ class Selection(Screen):
         self._print_selection()
 
 
-    def screen_update(self):
-        pass
-
-
 class Welcome(Selection):
     """Ammonia welcome screen."""
 

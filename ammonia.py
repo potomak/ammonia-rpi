@@ -64,6 +64,7 @@ class Ammonia(object):
         self._setup_GPIO()
         self.current_screen_daemon = None
         self.daemon_should_run = False
+        self.inputs_state = dict(zip(['%s_prev' % x for x in (LCD.LEFT, LCD.RIGHT, LCD.UP, LCD.DOWN, LCD.SELECT)], [GPIO.HIGH]*5))
 
 
     def _setup_serial(self):
@@ -127,9 +128,25 @@ class Ammonia(object):
 
     def _handle_input(self):
         for button in self.current_screen_instance.buttons():
-            if self.lcd.is_pressed(button):
-                action = self.current_screen_instance.action(button)
-                self._call_method(action['method'], action['args'])
+            curr_key = '%s_curr' % button
+            prev_key = '%s_prev' % button
+            time_key = '%s_time' % button
+
+            self.inputs_state[curr_key] = self.lcd._mcp.input(button)
+
+            # if the switch changed, due to bounce or pressing...
+            if self.inputs_state[curr_key] != self.inputs_state[prev_key]:
+                # reset the debouncing timer
+                self.inputs_state[time_key] = time.time()
+
+            if time.time() - self.inputs_state[time_key] > DEBOUNCE:
+                # whatever the switch is at, its been there for a long time so
+                # lets settle on it!
+                if self.lcd.is_pressed(button):
+                    action = self.current_screen_instance.action(button)
+                    self._call_method(action['method'], action['args'])
+
+            self.inputs_state[prev_key] = self.inputs_state[curr_key]
 
 
     def _transition_to(self, target):
@@ -205,10 +222,7 @@ class Ammonia(object):
         time_stamp = time.time()
 
         while True:
-            time_now = time.time()
-            if (time_now - time_stamp) >= self.DEBOUNCE:
-                self._handle_input()
-                time_stamp = time_now
+            self._handle_input()
 
 
 def signal_handler(signal, frame):

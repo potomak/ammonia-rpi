@@ -82,7 +82,7 @@ class Calibrate(Selection):
     """Select probe before calibration."""
 
     INTERACTIONS = {
-        LCD.LEFT: {'method': 'transition_to', 'args': ('screens.Welcome', )},
+        LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )},
         LCD.UP: {'method': 'select_prev_item', 'args': ()},
         LCD.DOWN: {'method': 'select_next_item', 'args': ()},
         LCD.SELECT: {'method': 'transition_to_item', 'args': ()}
@@ -99,7 +99,7 @@ class Measure(Screen):
     """Measure NH4+ concentration."""
 
     INTERACTIONS = {
-        LCD.LEFT: {'method': 'transition_to', 'args': ('screens.Welcome', )}
+        LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )}
     }
 
 

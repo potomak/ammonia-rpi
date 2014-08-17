@@ -27,12 +27,8 @@ class Ammonia(object):
     ORP_CHANNEL  = 2
     TEMP_CHANNEL = 3
 
-    # app screens
-    SCREENS = {
-        'screens.Welcome': {},
-        'screens.Measure': {},
-        'screens.Calibrate': {}
-    }
+    # initialization screen
+    INIT_SCREEN = 'welcome'
 
     # custom characters
     RIGHT_ARROW_CHAR = 0
@@ -117,16 +113,15 @@ class Ammonia(object):
 
 
     def _call_method(self, name, args=()):
-        getattr(self, '_%s' % name)(*args)
+        return getattr(self, '_%s' % name)(*args)
 
 
-    def _get_class(self, klass):
-        parts = klass.split('.')
-        module = '.'.join(parts[:-1])
-        m = __import__(module)
-        for comp in parts[1:]:
-            m = getattr(m, comp)
-        return m
+    def _classify(self, klass_string):
+        return string.capwords(klass_string, '_').replace('_', '')
+
+
+    def _get_screen_class(self, klass):
+        return getattr(screens, klass)
 
 
     def _handle_input(self):
@@ -162,7 +157,8 @@ class Ammonia(object):
 
         # create a new instance of target screen class
         self.current_screen = target
-        self.current_screen_instance = self._get_class(target)(self)
+        TargetScreenClass = self._get_screen_class(self._classify(target))
+        self.current_screen_instance = TargetScreenClass(self)
         self.current_screen_instance.screen_init()
 
         # start update thread if screen_update method is defined
@@ -176,7 +172,7 @@ class Ammonia(object):
 
     def _transition_to_item(self):
         target = self.current_screen_instance.current_item_name()
-        self._transition_to('screens.%s' % string.capwords(target, '_').replace('_', ''))
+        self._transition_to(target)
 
 
     def _select_next_item(self):
@@ -193,7 +189,7 @@ class Ammonia(object):
 
 
     def start(self):
-        self._transition_to('screens.Welcome')
+        self._transition_to(self.INIT_SCREEN)
         time_stamp = time.time()
 
         while True:

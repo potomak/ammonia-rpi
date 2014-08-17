@@ -30,9 +30,7 @@ class Ammonia(object):
     # app screens
     SCREENS = {
         'screens.Welcome': {},
-        'measure': {
-            LCD.LEFT: {'method': 'transition_to', 'args': ('welcome', )}
-        },
+        'screens.Measure': {},
         'screens.Calibrate': {}
     }
 
@@ -98,7 +96,7 @@ class Ammonia(object):
         self.lcd.write8(LCD.LCD_SETDDRAMADDR, False)
 
 
-    def _read_message(self):
+    def read_message(self):
         message = ''
 
         data = self.serial.read()
@@ -109,7 +107,7 @@ class Ammonia(object):
         return message
 
 
-    def _select_channel(self, number):
+    def select_channel(self, number):
         b_value = number % 2
         number = number / 2
         a_value = number % 2
@@ -155,16 +153,19 @@ class Ammonia(object):
 
 
     def _transition_to(self, target):
+        # wait for current thread to join
         if self.current_screen_daemon:
             self.daemon_should_run = False
             self.lcd.clear()
             self.lcd.message("Please wait...")
             self.current_screen_daemon.join(10)
 
+        # create a new instance of target screen class
         self.current_screen = target
         self.current_screen_instance = self._get_class(target)(self)
         self.current_screen_instance.screen_init()
 
+        # start update thread if screen_update method is defined
         target_method = getattr(self.current_screen_instance, 'screen_update', False)
         if target_method:
             self.daemon_should_run = True
@@ -188,37 +189,6 @@ class Ammonia(object):
 
     def _calibrate_selected_probe(self):
         # TODO
-        pass
-
-
-    def _measure_screen_init(self):
-        self.lcd.clear()
-        self.lcd.message("Measuring...")
-
-
-    def _measure_screen_update(self):
-        while self.daemon_should_run:
-            self._select_channel(self.TEMP_CHANNEL)
-            self.serial.write("R\r")
-            temp = self._read_message()
-
-            self._select_channel(self.EC_CHANNEL)
-            self.serial.write("%sC\r" % temp)
-            ec, _, _ = self._read_message().split(',')
-
-            self._select_channel(self.ORP_CHANNEL)
-            self.serial.write("R\r")
-            orp = self._read_message()
-
-            ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
-
-            self.lcd.clear()
-            self.lcd.message("NH4+ (mg/l): %s\n" % ammonia)
-            self.lcd.message("Temp (C): %s - EC (mS/cm): %s" % (temp, ec))
-
-
-    def _predict_ammonia(self, temp, ec, orp):
-        # TODO: implement ammonia prediction algorithm
         pass
 
 

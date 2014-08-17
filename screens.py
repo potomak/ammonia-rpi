@@ -93,3 +93,46 @@ class Calibrate(Selection):
 
     def __init__(self, ammonia):
         super(Calibrate, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
+
+
+class Measure(Screen):
+    """Measure NH4+ concentration."""
+
+    INTERACTIONS = {
+        LCD.LEFT: {'method': 'transition_to', 'args': ('screens.Welcome', )}
+    }
+
+
+    def __init__(self, ammonia):
+        super(Measure, self).__init__(ammonia, self.INTERACTIONS)
+
+
+    def screen_init(self):
+        self.ammonia.lcd.clear()
+        self.ammonia.lcd.message("Measuring...")
+
+
+    def screen_update(self):
+        while self.ammonia.daemon_should_run:
+            self.ammonia.select_channel(Ammonia.TEMP_CHANNEL)
+            self.ammonia.serial.write("R\r")
+            temp = self.ammonia.read_message()
+
+            self.ammonia.select_channel(Ammonia.EC_CHANNEL)
+            self.ammonia.serial.write("%sC\r" % temp)
+            ec, _, _ = self.ammonia.read_message().split(',')
+
+            self.ammonia.select_channel(Ammonia.ORP_CHANNEL)
+            self.ammonia.serial.write("R\r")
+            orp = self.ammonia.read_message()
+
+            ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
+
+            self.ammonia.lcd.clear()
+            self.ammonia.lcd.message("NH4+ (mg/l): %s\n" % ammonia)
+            self.ammonia.lcd.message("Temp (C): %s - EC (mS/cm): %s" % (temp, ec))
+
+
+    def _predict_ammonia(self, temp, ec, orp):
+        # TODO: implement ammonia prediction algorithm
+        pass

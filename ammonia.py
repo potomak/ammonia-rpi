@@ -19,6 +19,9 @@ class Ammonia(object):
     A_PIN = 7
     B_PIN = 12
 
+    # plate buttons
+    BUTTONS = (LCD.LEFT, LCD.RIGHT, LCD.UP, LCD.DOWN, LCD.SELECT)
+
     # probes channels
     EC_CHANNEL   = 1
     ORP_CHANNEL  = 2
@@ -64,7 +67,9 @@ class Ammonia(object):
         self._setup_GPIO()
         self.current_screen_daemon = None
         self.daemon_should_run = False
-        self.inputs_state = dict(zip(['%s_prev' % x for x in (LCD.LEFT, LCD.RIGHT, LCD.UP, LCD.DOWN, LCD.SELECT)], [GPIO.HIGH]*5))
+        prev_keys = ['%s_prev' % x for x in self.BUTTONS]
+        time_keys = ['%s_time' % x for x in self.BUTTONS]
+        self.inputs_state = dict(zip(prev_keys + time_keys, [GPIO.HIGH]*5 + [0]*5))
 
 
     def _setup_serial(self):
@@ -139,7 +144,7 @@ class Ammonia(object):
                 # reset the debouncing timer
                 self.inputs_state[time_key] = time.time()
 
-            if time.time() - self.inputs_state[time_key] > DEBOUNCE:
+            if time.time() - self.inputs_state[time_key] > self.DEBOUNCE:
                 # whatever the switch is at, its been there for a long time so
                 # lets settle on it!
                 if self.lcd.is_pressed(button):

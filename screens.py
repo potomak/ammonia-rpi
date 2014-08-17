@@ -5,8 +5,8 @@ from ammonia import Ammonia
 class Screen(object):
     """A screen."""
 
-    def __init__(self, lcd, interactions):
-        self.lcd = lcd
+    def __init__(self, ammonia, interactions):
+        self.ammonia = ammonia
         self.interactions = interactions
 
 
@@ -24,8 +24,8 @@ class Selection(Screen):
     LCD_LINES = 2
 
 
-    def __init__(self, lcd, interactions, items):
-        super(Selection, self).__init__(lcd, interactions)
+    def __init__(self, ammonia, interactions, items):
+        super(Selection, self).__init__(ammonia, interactions)
         self.current_item = 0
         self.window_index = 0
         self.items = items
@@ -36,10 +36,10 @@ class Selection(Screen):
 
 
     def _print_selection(self):
-        self.lcd.clear()
+        self.ammonia.lcd.clear()
         for item in self.items[self.window_index:self.window_index + self.LCD_LINES]:
             cursor = chr(Ammonia.RIGHT_ARROW_CHAR) if item == self.current_item_name() else ' '
-            self.lcd.message("%s%s\n" % (cursor, string.capwords(item, '_').replace('_', '')))
+            self.ammonia.lcd.message("%s%s\n" % (cursor, string.capwords(item, '_').replace('_', '')))
 
 
     def select_next_item(self):
@@ -74,8 +74,8 @@ class Welcome(Selection):
     ITEMS = ('measure', 'calibrate')
 
 
-    def __init__(self, lcd):
-        super(Welcome, self).__init__(lcd, self.INTERACTIONS, self.ITEMS)
+    def __init__(self, ammonia):
+        super(Welcome, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
 
 
 class Calibrate(Selection):
@@ -91,5 +91,5 @@ class Calibrate(Selection):
     ITEMS = ('temperature', 'EC', 'ORP')
 
 
-    def __init__(self, lcd):
-        super(Calibrate, self).__init__(lcd, self.INTERACTIONS, self.ITEMS)
+    def __init__(self, ammonia):
+        super(Calibrate, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)

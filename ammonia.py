@@ -162,7 +162,7 @@ class Ammonia(object):
             self.current_screen_daemon.join(10)
 
         self.current_screen = target
-        self.current_screen_instance = self._get_class(target)(self.lcd)
+        self.current_screen_instance = self._get_class(target)(self)
         self.current_screen_instance.screen_init()
 
         target_method = getattr(self.current_screen_instance, 'screen_update', False)

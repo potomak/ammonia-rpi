@@ -16,8 +16,8 @@ class Ammonia(object):
     DEBOUNCE = 0.1
 
     # channel selection pins
-    A_PIN = 7
-    B_PIN = 12
+    A_PIN = 16
+    B_PIN = 18
 
     # plate buttons
     BUTTONS = (LCD.LEFT, LCD.RIGHT, LCD.UP, LCD.DOWN, LCD.SELECT)

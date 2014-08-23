@@ -88,7 +88,7 @@ class Calibrate(Selection):
         LCD.SELECT: {'method': 'transition_to_item', 'args': ()}
     }
 
-    ITEMS = ('temperature', 'EC', 'ORP')
+    ITEMS = ('temperature', 'ec', 'orp')
 
 
     def __init__(self, ammonia):
@@ -136,3 +136,60 @@ class Measure(Screen):
     def _predict_ammonia(self, temp, ec, orp):
         # TODO: implement ammonia prediction algorithm
         pass
+
+
+class Temperature(Screen):
+    INTERACTIONS = {
+        LCD.LEFT: {'method': 'select_prev_digit', 'args': ()},
+        LCD.RIGHT: {'method': 'select_next_digit', 'args': ()},
+        LCD.UP: {'method': 'increase_digit', 'args': ()},
+        LCD.DOWN: {'method': 'decrease_digit', 'args': ()},
+        LCD.SELECT: {'method': 'calibrate', 'args': ()}
+    }
+
+
+    def __init__(self, ammonia, interactions, items):
+        super(Temperature, self).__init__(ammonia, interactions)
+        self.selected_digit = 0
+
+
+    def screen_init(self):
+        self.ammonia.lcd.clear()
+        self.ammonia.lcd.message("Measuring...")
+
+        self.ammonia.select_channel(Ammonia.TEMP_CHANNEL)
+        self.ammonia.serial.write("R\r")
+        self.temperature = self.ammonia.read_message()
+
+        self.ammonia.lcd.clear()
+        self.ammonia.lcd.message("%s\n" % self.temperature)
+        self.ammonia.lcd.message(self._digit_selector_string())
+
+
+    def _digit_selector_string(self):
+        return '%s%s' % (' ' * self.selected_digit, chr(Ammonia.DOUBLE_ARROW_CHAR))
+
+
+    def select_prev_digit(self):
+        # TODO
+        pass
+
+
+    def select_next_digit(self):
+        # TODO
+        pass
+
+
+    def increase_digit(self):
+        # TODO
+        pass
+
+
+    def decrease_digit(self):
+        # TODO
+        pass
+
+
+    def calibrate(self):
+        # TODO
+        self.ammonia._transition_to('welcome')

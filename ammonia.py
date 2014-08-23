@@ -28,7 +28,7 @@ class Ammonia(object):
     TEMP_CHANNEL = 3
 
     # initialization screen
-    INIT_SCREEN = 'welcome'
+    INIT_SCREEN = 'welcome_screen'
 
     # custom characters
     RIGHT_ARROW_CHAR = 0

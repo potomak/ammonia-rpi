@@ -2,7 +2,6 @@ import string
 import Adafruit_CharLCD as LCD
 
 class Screen(object):
-    """A screen."""
 
     def __init__(self, ammonia, interactions):
         self.ammonia = ammonia
@@ -17,14 +16,13 @@ class Screen(object):
         return self.interactions[button]
 
 
-class Selection(Screen):
-    """A selection screen."""
+class SelectionScreen(Screen):
 
     LCD_LINES = 2
 
 
     def __init__(self, ammonia, interactions, items):
-        super(Selection, self).__init__(ammonia, interactions)
+        super(SelectionScreen, self).__init__(ammonia, interactions)
         self.current_item = 0
         self.window_index = 0
         self.items = items
@@ -61,8 +59,7 @@ class Selection(Screen):
         self._print_selection()
 
 
-class Welcome(Selection):
-    """Ammonia welcome screen."""
+class WelcomeScreen(SelectionScreen):
 
     INTERACTIONS = {
         LCD.UP: {'method': 'select_prev_item', 'args': ()},
@@ -74,10 +71,10 @@ class Welcome(Selection):
 
 
     def __init__(self, ammonia):
-        super(Welcome, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
+        super(WelcomeScreen, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
 
 
-class Calibrate(Selection):
+class CalibrateScreen(SelectionScreen):
     """Select probe before calibration."""
 
     INTERACTIONS = {
@@ -91,10 +88,10 @@ class Calibrate(Selection):
 
 
     def __init__(self, ammonia):
-        super(Calibrate, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
+        super(CalibrateScreen, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
 
 
-class Measure(Screen):
+class MeasureScreen(Screen):
     """Measure NH4+ concentration."""
 
     INTERACTIONS = {
@@ -103,7 +100,7 @@ class Measure(Screen):
 
 
     def __init__(self, ammonia):
-        super(Measure, self).__init__(ammonia, self.INTERACTIONS)
+        super(MeasureScreen, self).__init__(ammonia, self.INTERACTIONS)
 
 
     def screen_init(self):
@@ -137,7 +134,7 @@ class Measure(Screen):
         pass
 
 
-class Temperature(Screen):
+class TemperatureScreen(Screen):
     INTERACTIONS = {
         LCD.LEFT: {'method': 'select_prev_digit', 'args': ()},
         LCD.RIGHT: {'method': 'select_next_digit', 'args': ()},
@@ -148,7 +145,7 @@ class Temperature(Screen):
 
 
     def __init__(self, ammonia):
-        super(Temperature, self).__init__(ammonia, self.INTERACTIONS)
+        super(TemperatureScreen, self).__init__(ammonia, self.INTERACTIONS)
         self.selected_digit = 0
 
 

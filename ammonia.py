@@ -104,6 +104,7 @@ class Ammonia(object):
 
 
     def select_channel(self, number):
+        number = number - 1
         b_value = number % 2
         number = number / 2
         a_value = number % 2

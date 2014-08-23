@@ -148,8 +148,8 @@ class Temperature(Screen):
     }
 
 
-    def __init__(self, ammonia, interactions, items):
-        super(Temperature, self).__init__(ammonia, interactions)
+    def __init__(self, ammonia):
+        super(Temperature, self).__init__(ammonia, self.INTERACTIONS)
         self.selected_digit = 0
 
 

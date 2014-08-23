@@ -189,3 +189,11 @@ class TemperatureScreen(Screen):
     def calibrate(self):
         # TODO
         self.ammonia._transition_to('welcome')
+
+
+SCREENS = {
+    'welcome': WelcomeScreen,
+    'calibrate': CalibrateScreen,
+    'measure': MeasureScreen,
+    'temperature': TemperatureScreen
+}

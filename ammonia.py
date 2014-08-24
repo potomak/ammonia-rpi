@@ -2,11 +2,10 @@ import sys
 import signal
 import serial
 import threading
-import screens
 import time
-import string
 import RPi.GPIO as GPIO
 import Adafruit_CharLCD as LCD
+from screens import SCREENS
 
 
 class Ammonia(object):
@@ -117,12 +116,8 @@ class Ammonia(object):
         return getattr(self, '_%s' % name)(*args)
 
 
-    def _classify(self, klass_string):
-        return string.capwords(klass_string, '_').replace('_', '')
-
-
-    def _get_screen_class(self, klass):
-        return getattr(screens, klass)
+    def _get_screen_class(self, target):
+        return SCREENS[target]
 
 
     def _handle_input(self):
@@ -158,7 +153,7 @@ class Ammonia(object):
 
         # create a new instance of target screen class
         self.current_screen = target
-        TargetScreenClass = self._get_screen_class(self._classify(target))
+        TargetScreenClass = self._get_screen_class(target)
         self.current_screen_instance = TargetScreenClass(self)
         self.current_screen_instance.screen_init()
 

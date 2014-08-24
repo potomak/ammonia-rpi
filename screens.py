@@ -1,9 +1,7 @@
 import string
 import Adafruit_CharLCD as LCD
-from ammonia import Ammonia
 
 class Screen(object):
-    """A screen."""
 
     def __init__(self, ammonia, interactions):
         self.ammonia = ammonia
@@ -18,14 +16,13 @@ class Screen(object):
         return self.interactions[button]
 
 
-class Selection(Screen):
-    """A selection screen."""
+class SelectionScreen(Screen):
 
     LCD_LINES = 2
 
 
     def __init__(self, ammonia, interactions, items):
-        super(Selection, self).__init__(ammonia, interactions)
+        super(SelectionScreen, self).__init__(ammonia, interactions)
         self.current_item = 0
         self.window_index = 0
         self.items = items
@@ -38,7 +35,7 @@ class Selection(Screen):
     def _print_selection(self):
         self.ammonia.lcd.clear()
         for item in self.items[self.window_index:self.window_index + self.LCD_LINES]:
-            cursor = chr(Ammonia.RIGHT_ARROW_CHAR) if item == self.current_item_name() else ' '
+            cursor = chr(self.ammonia.RIGHT_ARROW_CHAR) if item == self.current_item_name() else ' '
             self.ammonia.lcd.message("%s%s\n" % (cursor, string.capwords(item, '_').replace('_', '')))
 
 
@@ -62,8 +59,7 @@ class Selection(Screen):
         self._print_selection()
 
 
-class Welcome(Selection):
-    """Ammonia welcome screen."""
+class WelcomeScreen(SelectionScreen):
 
     INTERACTIONS = {
         LCD.UP: {'method': 'select_prev_item', 'args': ()},
@@ -75,10 +71,10 @@ class Welcome(Selection):
 
 
     def __init__(self, ammonia):
-        super(Welcome, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
+        super(WelcomeScreen, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
 
 
-class Calibrate(Selection):
+class CalibrateScreen(SelectionScreen):
     """Select probe before calibration."""
 
     INTERACTIONS = {
@@ -92,10 +88,10 @@ class Calibrate(Selection):
 
 
     def __init__(self, ammonia):
-        super(Calibrate, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
+        super(CalibrateScreen, self).__init__(ammonia, self.INTERACTIONS, self.ITEMS)
 
 
-class Measure(Screen):
+class MeasureScreen(Screen):
     """Measure NH4+ concentration."""
 
     INTERACTIONS = {
@@ -104,7 +100,7 @@ class Measure(Screen):
 
 
     def __init__(self, ammonia):
-        super(Measure, self).__init__(ammonia, self.INTERACTIONS)
+        super(MeasureScreen, self).__init__(ammonia, self.INTERACTIONS)
 
 
     def screen_init(self):
@@ -114,15 +110,15 @@ class Measure(Screen):
 
     def screen_update(self):
         while self.ammonia.daemon_should_run:
-            self.ammonia.select_channel(Ammonia.TEMP_CHANNEL)
+            self.ammonia.select_channel(self.ammonia.TEMP_CHANNEL)
             self.ammonia.serial.write("R\r")
             temp = self.ammonia.read_message()
 
-            self.ammonia.select_channel(Ammonia.EC_CHANNEL)
+            self.ammonia.select_channel(self.ammonia.EC_CHANNEL)
             self.ammonia.serial.write("%sC\r" % temp)
             ec, _, _ = self.ammonia.read_message().split(',')
 
-            self.ammonia.select_channel(Ammonia.ORP_CHANNEL)
+            self.ammonia.select_channel(self.ammonia.ORP_CHANNEL)
             self.ammonia.serial.write("R\r")
             orp = self.ammonia.read_message()
 
@@ -138,7 +134,7 @@ class Measure(Screen):
         pass
 
 
-class Temperature(Screen):
+class TemperatureScreen(Screen):
     INTERACTIONS = {
         LCD.LEFT: {'method': 'select_prev_digit', 'args': ()},
         LCD.RIGHT: {'method': 'select_next_digit', 'args': ()},
@@ -149,7 +145,7 @@ class Temperature(Screen):
 
 
     def __init__(self, ammonia):
-        super(Temperature, self).__init__(ammonia, self.INTERACTIONS)
+        super(TemperatureScreen, self).__init__(ammonia, self.INTERACTIONS)
         self.selected_digit = 0
 
 
@@ -157,7 +153,7 @@ class Temperature(Screen):
         self.ammonia.lcd.clear()
         self.ammonia.lcd.message("Measuring...")
 
-        self.ammonia.select_channel(Ammonia.TEMP_CHANNEL)
+        self.ammonia.select_channel(self.ammonia.TEMP_CHANNEL)
         self.ammonia.serial.write("R\r")
         self.temperature = self.ammonia.read_message()
 
@@ -167,7 +163,7 @@ class Temperature(Screen):
 
 
     def _digit_selector_string(self):
-        return '%s%s' % (' ' * self.selected_digit, chr(Ammonia.DOUBLE_ARROW_CHAR))
+        return '%s%s' % (' ' * self.selected_digit, chr(self.ammonia.DOUBLE_ARROW_CHAR))
 
 
     def select_prev_digit(self):
@@ -193,3 +189,11 @@ class Temperature(Screen):
     def calibrate(self):
         # TODO
         self.ammonia._transition_to('welcome')
+
+
+SCREENS = {
+    'welcome': WelcomeScreen,
+    'calibrate': CalibrateScreen,
+    'measure': MeasureScreen,
+    'temperature': TemperatureScreen
+}

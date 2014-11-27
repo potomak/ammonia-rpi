@@ -1,7 +1,6 @@
 import sys
 import signal
 import serial
-import threading
 import time
 import RPi.GPIO as GPIO
 import Adafruit_CharLCD as LCD
@@ -58,8 +57,7 @@ class Ammonia(object):
         self._setup_serial()
         self._setup_LCD()
         self._setup_GPIO()
-        self.current_screen_daemon = None
-        self.daemon_should_run = False
+        self.current_screen_update = None
         prev_keys = ['%s_prev' % x for x in self.BUTTONS]
         time_keys = ['%s_time' % x for x in self.BUTTONS]
         self.inputs_state = dict(zip(prev_keys + time_keys, [GPIO.HIGH]*5 + [0]*5))
@@ -144,26 +142,14 @@ class Ammonia(object):
 
 
     def _transition_to(self, target):
-        # wait for current thread to join
-        if self.current_screen_daemon:
-            self.daemon_should_run = False
-            self.lcd.clear()
-            self.lcd.message("Please wait...")
-            self.current_screen_daemon.join(10)
-
         # create a new instance of target screen class
         self.current_screen = target
         TargetScreenClass = self._get_screen_class(target)
         self.current_screen_instance = TargetScreenClass(self)
         self.current_screen_instance.screen_init()
 
-        # start update thread if screen_update method is defined
-        target_method = getattr(self.current_screen_instance, 'screen_update', False)
-        if target_method:
-            self.daemon_should_run = True
-            self.current_screen_daemon = threading.Thread(target=target_method)
-            self.current_screen_daemon.daemon = True
-            self.current_screen_daemon.start()
+        # retrieve current screen's screen_update method
+        self.current_screen_update = getattr(self.current_screen_instance, 'screen_update', False)
 
 
     def _transition_to_item(self):
@@ -190,6 +176,10 @@ class Ammonia(object):
 
         while True:
             self._handle_input()
+
+            # run screen update method if present
+            if self.current_screen_update:
+                self.current_screen_update()
 
 
 def signal_handler(signal, frame):

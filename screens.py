@@ -109,24 +109,23 @@ class MeasureScreen(Screen):
 
 
     def screen_update(self):
-        while self.ammonia.daemon_should_run:
-            self.ammonia.select_channel(self.ammonia.TEMP_CHANNEL)
-            self.ammonia.serial.write("R\r")
-            temp = self.ammonia.read_message()
+        self.ammonia.select_channel(self.ammonia.TEMP_CHANNEL)
+        self.ammonia.serial.write("R\r")
+        temp = self.ammonia.read_message()
 
-            self.ammonia.select_channel(self.ammonia.EC_CHANNEL)
-            self.ammonia.serial.write("%sC\r" % temp)
-            ec, _, _ = self.ammonia.read_message().split(',')
+        self.ammonia.select_channel(self.ammonia.EC_CHANNEL)
+        self.ammonia.serial.write("%sC\r" % temp)
+        ec, _, _ = self.ammonia.read_message().split(',')
 
-            self.ammonia.select_channel(self.ammonia.ORP_CHANNEL)
-            self.ammonia.serial.write("R\r")
-            orp = self.ammonia.read_message()
+        self.ammonia.select_channel(self.ammonia.ORP_CHANNEL)
+        self.ammonia.serial.write("R\r")
+        orp = self.ammonia.read_message()
 
-            ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
+        ammonia = self._predict_ammonia(float(temp), int(ec), float(orp))
 
-            self.ammonia.lcd.clear()
-            self.ammonia.lcd.message("NH4+ (mg/l): %s\n" % ammonia)
-            self.ammonia.lcd.message("Temp (C): %s - EC (mS/cm): %s" % (temp, ec))
+        self.ammonia.lcd.clear()
+        self.ammonia.lcd.message("NH4+ (mg/l): %s\n" % ammonia)
+        self.ammonia.lcd.message("Temp (C): %s - EC (mS/cm): %s" % (temp, ec))
 
 
     def _predict_ammonia(self, temp, ec, orp):
